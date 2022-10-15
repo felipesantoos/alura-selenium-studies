@@ -1,30 +1,23 @@
 package login;
 
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.edge.EdgeDriver;
 
 public class LoginTest {
+    private LoginPage loginPage;
 
-    private static final String URL_LOGIN = "http://localhost:8080/login";
-    private WebDriver browser;
-
-    @BeforeAll
-    public static void beforeAll() {
-        System.setProperty("webdriver.edge.driver", "drivers/msedgedriver.exe");
+    @AfterAll
+    public static void afterAll() {
+        LoginPage.configureEnvironmentVariables();
     }
 
     @BeforeEach
     public void beforeEach() {
-        this.browser = new EdgeDriver();
-        this.browser.navigate().to(URL_LOGIN);
+        this.loginPage = new LoginPage();
     }
 
     @AfterEach
     public void afterEach() {
-        this.browser.quit();
+        this.loginPage.close();
     }
 
     @Test
@@ -33,15 +26,12 @@ public class LoginTest {
         String username = "fulano";
         String password = "pass";
 
-        this.browser.findElement(By.id("username")).sendKeys(username);
-        this.browser.findElement(By.id("password")).sendKeys(password);
-        this.browser.findElement(By.id("btn-login")).click();
+        this.loginPage.fillForm(username, password);
+        this.loginPage.clickOnLoginButton();
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(URL_LOGIN, currentUrl);
-        Assertions.assertEquals(targetUrl, currentUrl);
-        String loggedUserUsername = this.browser.findElement(By.id("logged-user-username")).getText();
-        Assertions.assertEquals(username, loggedUserUsername);
+        Assertions.assertNotEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(targetUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(username, this.loginPage.getLoggedUsername());
     }
 
     @Test
@@ -51,18 +41,15 @@ public class LoginTest {
         String password = "pass";
         String expectedError = "Usuário e senha inválidos.";
 
-        this.browser.findElement(By.id("username")).sendKeys(username);
-        this.browser.findElement(By.id("password")).sendKeys(password);
-        this.browser.findElement(By.id("btn-login")).click();
+        this.loginPage.fillForm(username, password);
+        this.loginPage.clickOnLoginButton();
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(URL_LOGIN, currentUrl);
-        Assertions.assertEquals(targetUrl, currentUrl);
-        Assertions.assertTrue(this.browser.getPageSource().contains(expectedError));
-        String currentError = this.browser.findElement(By.className("alert-danger")).getText();
+        Assertions.assertNotEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(targetUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertTrue(this.loginPage.getPageSource().contains(expectedError));
+        String currentError = this.loginPage.getElementTextByClassName("alert-danger");
         Assertions.assertEquals(expectedError, currentError);
-        Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.browser.findElement(By.id("logged-user-username")));
+        Assertions.assertFalse(this.loginPage.isElementFoundedById("logged-user-username"));
     }
 
     @Test
@@ -72,18 +59,15 @@ public class LoginTest {
         String password = "";
         String expectedError = "Usuário e senha inválidos.";
 
-        this.browser.findElement(By.id("username")).sendKeys(username);
-        this.browser.findElement(By.id("password")).sendKeys(password);
-        this.browser.findElement(By.id("btn-login")).click();
+        this.loginPage.fillForm(username, password);
+        this.loginPage.clickOnLoginButton();
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(URL_LOGIN, currentUrl);
-        Assertions.assertEquals(targetUrl, currentUrl);
-        Assertions.assertTrue(this.browser.getPageSource().contains(expectedError));
-        String actualError = this.browser.findElement(By.className("alert-danger")).getText();
+        Assertions.assertNotEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(targetUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertTrue(this.loginPage.getPageSource().contains(expectedError));
+        String actualError = this.loginPage.getElementTextByClassName("alert-danger");
         Assertions.assertEquals(expectedError, actualError);
-        Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.browser.findElement(By.id("logged-user-username")));
+        Assertions.assertFalse(this.loginPage.isElementFoundedById("logged-user-username"));
     }
 
     @Test
@@ -93,18 +77,15 @@ public class LoginTest {
         String password = "pass";
         String expectedError = "Usuário e senha inválidos.";
 
-        this.browser.findElement(By.id("username")).sendKeys(username);
-        this.browser.findElement(By.id("password")).sendKeys(password);
-        this.browser.findElement(By.id("btn-login")).click();
+        this.loginPage.fillForm(username, password);
+        this.loginPage.clickOnLoginButton();
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(URL_LOGIN, currentUrl);
-        Assertions.assertEquals(targetUrl, currentUrl);
-        Assertions.assertTrue(this.browser.getPageSource().contains(expectedError));
-        String actualError = this.browser.findElement(By.className("alert-danger")).getText();
+        Assertions.assertNotEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(targetUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertTrue(this.loginPage.getPageSource().contains(expectedError));
+        String actualError = this.loginPage.getElementTextByClassName("alert-danger");
         Assertions.assertEquals(expectedError, actualError);
-        Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.browser.findElement(By.id("logged-user-username")));
+        Assertions.assertFalse(this.loginPage.isElementFoundedById("logged-user-username"));
     }
 
     @Test
@@ -114,29 +95,26 @@ public class LoginTest {
         String password = "wrong-password";
         String expectedError = "Usuário e senha inválidos.";
 
-        this.browser.findElement(By.id("username")).sendKeys(username);
-        this.browser.findElement(By.id("password")).sendKeys(password);
-        this.browser.findElement(By.id("btn-login")).click();
+        this.loginPage.fillForm(username, password);
+        this.loginPage.clickOnLoginButton();
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(URL_LOGIN, currentUrl);
-        Assertions.assertEquals(targetUrl, currentUrl);
-        Assertions.assertTrue(this.browser.getPageSource().contains(expectedError));
-        String actualError = this.browser.findElement(By.className("alert-danger")).getText();
+        Assertions.assertNotEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(targetUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertTrue(this.loginPage.getPageSource().contains(expectedError));
+        String actualError = this.loginPage.getElementTextByClassName("alert-danger");
         Assertions.assertEquals(expectedError, actualError);
-        Assertions.assertThrows(NoSuchElementException.class,
-                () -> this.browser.findElement(By.id("logged-user-username")));
+        Assertions.assertFalse(this.loginPage.isElementFoundedById("logged-user-username"));
     }
 
     @Test
     public void shouldNotAccessRestrictPageWithoutLoginBefore() {
-        String initialUrl = "http://localhost:8080/leiloes/2";
+        String restrictUrl = "http://localhost:8080/leiloes/2";
 
-        this.browser.navigate().to(initialUrl);
+        this.loginPage.redirectTo(restrictUrl);
 
-        String currentUrl = this.browser.getCurrentUrl();
-        Assertions.assertNotEquals(initialUrl, currentUrl);
-        Assertions.assertEquals(URL_LOGIN, currentUrl);
-        Assertions.assertFalse(this.browser.getPageSource().contains("Dados do Leilão"));
+        Assertions.assertNotEquals(restrictUrl, this.loginPage.getCurrentUrl());
+        Assertions.assertEquals(LoginPage.LOGIN_URL, this.loginPage.getCurrentUrl());
+
+        Assertions.assertFalse(this.loginPage.getPageSource().contains("Dados do Leilão"));
     }
 }
